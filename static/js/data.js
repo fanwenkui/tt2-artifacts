@@ -161,6 +161,12 @@ var reducts = {
         'hs': 0,
         'cs': 1
     },
+    'slash':{
+        'pet': 1,
+        'sc': 1,
+        'hs': 1,
+        'cs': 1
+    }
 }
 
 var artifacts = {
@@ -1069,7 +1075,7 @@ var artifacts = {
             'cexpo': 2,
             'type': 'multiply',
             'expo': {
-                'reduct': 'companion'
+                'reduct': 'slash'
             }
         },
         'sv': {
@@ -1164,7 +1170,7 @@ var artifacts = {
             'cexpo': 2.2,
             'type': 'multiply',
             'expo': {
-                'sum': 'companion_ranged'
+                'sum': 'slash_ranged'
             }
         },
         'ig': {

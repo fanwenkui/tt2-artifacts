@@ -195,8 +195,8 @@ function calculateWeight(k, expo) {
                 results.color = determineColor(results.rating, true);
                 break;
 
-            case 'companion_ranged':
-                results.rating = reducts.companion[build];
+            case 'slash_ranged':
+                results.rating = reducts.slash[build];
                 if (-1 != hero_type.indexOf('ranged')) {
                     results.rating += reducts.hero[build];
                 }
@@ -327,7 +327,7 @@ function calculateWeight(k, expo) {
                 results.rating += reducts.helmet[build];
                 results.rating += reducts.gold;
                 results.rating += 1;
-                results.rating += reducts.companion[build];
+                results.rating += reducts.slash[build];
                 results.color = 'info';
                 break;
 

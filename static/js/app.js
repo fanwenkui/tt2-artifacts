@@ -1,6 +1,8 @@
 let vm=new Vue({
     el:'#tabContent',
     data:{
+        totalRelics:0,
+        bosLevel:0,
         bookSet:{
             stage:0,
             mythic:0,
@@ -14,6 +16,10 @@ let vm=new Vue({
             platinum:1//白金
         },
         log:{
+            '2019.05.18':'1.圣物选择单位从e81提升到e120<br/>\
+                          2.新增红书占比计算功能<br/>\
+                          3.永恒黑暗等级计算增加雷鸣套触发时的需求等级<br/>\
+                          4.修复了紫晶之杖和守护者树叶对天堂流派加成不正确的问题',
             '2019.05.17':'1.新增红书等级推荐功能(修改了算法,推荐等级降低了，较为合理)<br/>\
                           2.新增永恒黑暗等级计算功能<br/>\
                           3.优化了代码架构,后面新增功能时会更及时了<br/>\
@@ -26,7 +32,8 @@ let vm=new Vue({
                         5.迪朗达尔之剑现在改为0优先度(之前和冥界头骨一样)<br/>\
                         6.去掉了技能加点优化功能，因为感觉不智能，我也没有时间去修复得更智能<br/>\
                         （ps：白天要上班，更新不够及时，望见谅）'
-        }
+        },
+        vision:'3.1.1'
     },
     created:function(){
         if(window.localStorage.getItem('bookSet')){
@@ -35,8 +42,25 @@ let vm=new Vue({
         if(window.localStorage.getItem('edSet')){
             this.edSet=JSON.parse(window.localStorage.getItem('edSet'));
         }
+        if(window.localStorage.getItem('totalRelics')){
+            this.totalRelics=window.localStorage.getItem('totalRelics');
+        }
+        if(window.localStorage.getItem('bosLevel')){
+            this.bosLevel=window.localStorage.getItem('bosLevel');
+        }
     },
     computed:{
+        bookRatio:function(){
+            window.localStorage.setItem('totalRelics',this.totalRelics?this.totalRelics:0);
+            window.localStorage.setItem('bosLevel',this.bosLevel?this.bosLevel:0);
+            if(this.bosLevel!=0 && this.totalRelics!=0){
+                let bookInfo=artifacts.data.bos;
+                let bookCost=Math.pow(parseFloat(this.bosLevel) + 0.5, bookInfo.cexpo + 1)/(bookInfo.cexpo + 1) * bookInfo.ccoef;
+                return (bookCost/parseFloat(this.totalRelics)*100).toFixed(2)+'%';
+            }else{
+                return 0;
+            }
+        },
         bookLevel:function () {
             let stage=this.bookSet.stage;
             let mythic=this.bookSet.mythic;
@@ -76,14 +100,19 @@ let vm=new Vue({
             let ori_titan=8+stage/250;
             let act_titan=ori_titan-(1*this.edSet.intimidate+1*this.edSet.arcane);
             let snap_titan=Math.floor(act_titan/2);
+            let half_snap_titan=Math.floor(snap_titan/2);
             let max_snap=edSnap[25];
 
             let half_need=0;
             let max_need=0;
+            let double_half_need=0;
 
             for(let k in edSnap){
                 k=parseInt(k);
                 let num=edSnap[k]+1;
+                if(num<half_snap_titan){
+                    double_half_need=Math.min(k+1,25);
+                }
                 if(num<snap_titan){
                     half_need=Math.min(k+1,25);
                 }
@@ -96,8 +125,10 @@ let vm=new Vue({
                 oriTitan:ori_titan,
                 actTitan:act_titan,
                 snapTitan:snap_titan,
+                halfSnapTitan:half_snap_titan,
                 maxSnap:max_snap,
                 halfNeed:half_need,
+                doubleHalfNeed:double_half_need,
                 maxNeed:max_need
             };
         },
@@ -139,6 +170,46 @@ let vm=new Vue({
         },
         actSnap:function (num) {
             return Math.floor((num+1*this.edSet.impact+1*this.edSet.arcane)*this.edSet.platinum);
+        },
+        displayTruncated:function (value) {
+            if (value > 999999999999999) {
+                value = value.toExponential(2);
+                value = value.replace(/\+/, '');
+            } else {
+                if (value > 999999999999) {
+                    value = (value / 1000000000000).toFixed(2).replace(/\.?0+$/, '');
+                    value += 'T';
+                } else if (value > 999999999) {
+                    value = (value / 1000000000).toFixed(2).replace(/\.?0+$/, '');
+                    value += 'B';
+                } else if (value > 999999) {
+                    value = (value / 1000000).toFixed(2).replace(/\.?0+$/, '');
+                    value += 'M';
+                } else if (value > 999) {
+                    value = (value / 1000).toFixed(2).replace(/\.?0+$/, '');
+                    value += 'K';
+                } else if (isNaN(value)) {
+                    value = value.toFixed(2).replace(/\.?0+$/, '');
+                }
+            }
+            return (value);
+        },
+        avoidSci:function (x) {
+            if (Math.abs(x) < 1.0) {
+                var e = parseInt(x.toString().split('e-')[1]);
+                if (e) {
+                    x *= Math.pow(10, e - 1);
+                    x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+                }
+            } else {
+                var e = parseInt(x.toString().split('+')[1]);
+                if (e > 20) {
+                    e -= 20;
+                    x /= Math.pow(10, e);
+                    x += (new Array(e + 1)).join('0');
+                }
+            }
+            return x;
         }
     }
 });
@@ -1597,14 +1668,14 @@ if (storageAvailable('localStorage')) {
 function storeData() {
     window.localStorage.setItem('artifacts', JSON.stringify(artifacts));
     window.localStorage.setItem('skills', JSON.stringify(skills));
-    window.localStorage.setItem('build', $('#build').val());
-    window.localStorage.setItem('hero', $('#hero').val());
-    window.localStorage.setItem('gold', $('#gold').val());
-    window.localStorage.setItem('active', $('#active').val());
-    window.localStorage.setItem('relic_factor', $('#relic_factor').val());
-    window.localStorage.setItem('spend', $('#spend').val());
-    window.localStorage.setItem('spend_decimal', $('#spend_decimal').val());
-    window.localStorage.setItem('ocd', $('#ocd').val());
+    window.localStorage.setItem('build', $('#build').val()?$('#build').val():'');
+    window.localStorage.setItem('hero', $('#hero').val()?$('#hero').val():'');
+    window.localStorage.setItem('gold', $('#gold').val()?$('#gold').val():'');
+    window.localStorage.setItem('active', $('#active').val()?$('#active').val():'');
+    window.localStorage.setItem('relic_factor', $('#relic_factor').val()?$('#relic_factor').val():'');
+    window.localStorage.setItem('spend', $('#spend').val()?$('#spend').val():'');
+    window.localStorage.setItem('spend_decimal', $('#spend_decimal').val()?$('#spend_decimal').val():''?$('#spend').val():'');
+    window.localStorage.setItem('ocd', $('#ocd').val()?$('#ocd').val():'');
     window.localStorage.setItem('splash', ($('#wet').prop('checked') == true ? 1 : 0));
 }
 
