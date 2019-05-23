@@ -166,8 +166,10 @@
                 </label>
             </div>
             <p>神器伤害： <span id="adsanity">0%</span></p>
+<!--            <p>Total efficiency： <span>{{totalEffect}}</span></p>-->
             <button type="button" class="btn btn-primary mb-3" onclick="checkAllArtifacts();">选中全部</button>
-            <button type="button" class="btn btn-secondary mb-3" onclick="dalViewArtifact(1);">截图模式</button>
+            <button type="button" class="btn btn-primary mb-3" @click="updateAllMaxArtifacts()">一键升满有等级上限的神器</button>
+<!--            <button type="button" class="btn btn-secondary mb-3" @click="changeScreen(true)">截图模式</button>-->
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="row mb-2 ml-2">
                     图例：
@@ -192,12 +194,12 @@
                 </table>
             </div>
         </div>
-        <div class="tab-pane fade" id="dal" role="tabpanel" aria-labelledby="dal-tab">
+        <div v-show="isScreen" class="tab-pane fade" id="dal" role="tabpanel" aria-labelledby="dal-tab">
             <div class="row mb-4" id="daltifacts">
             </div>
-            <button type="button" class="btn btn-secondary mb-3" onclick="dalViewArtifact(0);">退出截图模式</button>
+            <button type="button" class="btn btn-secondary mb-3" @click="changeScreen(false)">退出截图模式</button>
         </div>
-        <div class="tab-pane fade" id="reccs" role="tabpanel" aria-labelledby="reccs-tab">
+        <div v-show="!isScreen" class="tab-pane fade" id="reccs" role="tabpanel" aria-labelledby="reccs-tab">
             <div id="relicreccs">
                 <p>请输入预计花费的圣物数量： <br/>
                     <small>强制四舍五入</small>
@@ -539,9 +541,9 @@
 <script src="static/js/decimal.min.js"></script>
 <script src="static/js/data.min.js"></script>
 <script src="static/js/weights.min.js"></script>
-<!--<script src="static/js/app.min.js"></script>-->
+<script src="static/js/app.min.js"></script>
 <!--<script src="static/js/data.js"></script>-->
 <!--<script src="static/js/weights.js"></script>-->
-<script src="static/js/app.js"></script>
+<!--<script src="static/js/app.js"></script>-->
 </body>
 </html>
