@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="static/css/app.css"/>
 
     <!-- test use script -->
-    <!--    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
     <script type="text/javascript"
@@ -166,8 +166,10 @@
                 </label>
             </div>
             <p>神器伤害： <span id="adsanity">0%</span></p>
+<!--            <p>Total efficiency： <span>{{totalEffect}}</span></p>-->
             <button type="button" class="btn btn-primary mb-3" onclick="checkAllArtifacts();">选中全部</button>
-            <button type="button" class="btn btn-secondary mb-3" onclick="dalViewArtifact(1);">截图模式</button>
+            <button type="button" class="btn btn-primary mb-3" @click="updateAllMaxArtifacts()">一键升满有等级上限的神器</button>
+<!--            <button type="button" class="btn btn-secondary mb-3" @click="changeScreen(true)">截图模式</button>-->
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="row mb-2 ml-2">
                     图例：
@@ -192,12 +194,12 @@
                 </table>
             </div>
         </div>
-        <div class="tab-pane fade" id="dal" role="tabpanel" aria-labelledby="dal-tab">
+        <div v-show="isScreen" class="tab-pane fade" id="dal" role="tabpanel" aria-labelledby="dal-tab">
             <div class="row mb-4" id="daltifacts">
             </div>
-            <button type="button" class="btn btn-secondary mb-3" onclick="dalViewArtifact(0);">退出截图模式</button>
+            <button type="button" class="btn btn-secondary mb-3" @click="changeScreen(false)">退出截图模式</button>
         </div>
-        <div class="tab-pane fade" id="reccs" role="tabpanel" aria-labelledby="reccs-tab">
+        <div v-show="!isScreen" class="tab-pane fade" id="reccs" role="tabpanel" aria-labelledby="reccs-tab">
             <div id="relicreccs">
                 <p>请输入预计花费的圣物数量： <br/>
                     <small>强制四舍五入</small>
@@ -356,9 +358,9 @@
                 <button id="generateRelicUpdates" type="button" class="btn btn-primary mb-4"
                         onclick="generateUpgrades()">开始计算
                 </button>
-                <!--                <label class="ml-4">-->
-                <!--                    <small>**Note, this only applies to %-based recommendations.</small>-->
-                <!--                </label>-->
+<!--                <label class="ml-4">-->
+<!--                    <small>**Note, this only applies to %-based recommendations.</small>-->
+<!--                </label>-->
             </div>
             <div id="relicsuggs">
                 <div class="row mb-2 ml-2">
@@ -416,30 +418,30 @@
             </table>
             <table class="table table-striped table-sm table-dark">
                 <tbody>
-                <tr>
-                    <th>基础圣物</th>
-                    <td>{{bookLevel.relics}}</td>
-                </tr>
-                <tr>
-                    <th>低标</th>
-                    <td>{{bookLevel.low}}</td>
-                </tr>
-                <tr>
-                    <th>均标</th>
-                    <td>{{bookLevel.normal}}</td>
-                </tr>
-                <tr>
-                    <th>高标</th>
-                    <td>{{bookLevel.high}}</td>
-                </tr>
-                <tr>
-                    <th>红书是我的命</th>
-                    <td>{{bookLevel.veryHigh}}</td>
-                </tr>
-                <tr>
-                    <th>我就是红书</th>
-                    <td>{{bookLevel.superHigh}}</td>
-                </tr>
+                    <tr>
+                        <th>基础圣物</th>
+                        <td>{{bookLevel.relics}}</td>
+                    </tr>
+                    <tr>
+                        <th>低标</th>
+                        <td>{{bookLevel.low}}</td>
+                    </tr>
+                    <tr>
+                        <th>均标</th>
+                        <td>{{bookLevel.normal}}</td>
+                    </tr>
+                    <tr>
+                        <th>高标</th>
+                        <td>{{bookLevel.high}}</td>
+                    </tr>
+                    <tr>
+                        <th>红书是我的命</th>
+                        <td>{{bookLevel.veryHigh}}</td>
+                    </tr>
+                    <tr>
+                        <th>我就是红书</th>
+                        <td>{{bookLevel.superHigh}}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -503,16 +505,16 @@
         <div class="tab-pane fade" id="log" role="tabpanel" aria-labelledby="log-tab">
             <table class="table table-striped table-sm table-dark">
                 <thead>
-                <tr>
-                    <th style="min-width: 90px;">日期</th>
-                    <th>内容</th>
-                </tr>
+                    <tr>
+                        <th style="min-width: 90px;">日期</th>
+                        <th>内容</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr v-for="(value,key) in log">
-                    <td>{{key}}</td>
-                    <td v-html="value"></td>
-                </tr>
+                    <tr v-for="(value,key) in log">
+                        <td>{{key}}</td>
+                        <td v-html="value"></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -537,9 +539,9 @@
 <script src="static/js/jquery-3.2.1.slim.min.js"></script>
 <script src="static/js/bootstrap.bundle.min.js"></script>
 <script src="static/js/decimal.min.js"></script>
-<script src="static/js/data.min.js"></script>
-<script src="static/js/weights.min.js"></script>
-<script src="static/js/app.min.js"></script>
+<script src="static/js/data.min.js?v3.1.1"></script>
+<script src="static/js/weights.min.js?v3.1.1"></script>
+<script src="static/js/app.min.js?v3.1.1"></script>
 <!--<script src="static/js/data.js"></script>-->
 <!--<script src="static/js/weights.js"></script>-->
 <!--<script src="static/js/app.js"></script>-->
