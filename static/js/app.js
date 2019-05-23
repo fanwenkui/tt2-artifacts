@@ -1,6 +1,8 @@
+let jsVision='3.1.1';
 let vm=new Vue({
     el:'#tabContent',
     data:{
+        isScreen:false,
         totalRelics:0,
         bosLevel:0,
         bookSet:{
@@ -16,7 +18,9 @@ let vm=new Vue({
             platinum:1//白金
         },
         log:{
-            '2019.05.21':'紧急修复了圣物选择单位e81以后数据不对的问题',
+            '2019.05.24':'1.新增一键升满有等级上限的神器功能,减少满神器玩家首次录入神器时的工作量<br/>\
+                          2.修复红书占比计算有概率出现不能计算的bug',
+            '2019.05.21':'紧急修复了圣物单位选择e81以后数据不对的问题',
             '2019.05.18':'1.圣物选择单位从e81提升到e120<br/>\
                           2.新增红书占比计算功能<br/>\
                           3.永恒黑暗等级计算增加雷鸣套触发时的需求等级<br/>\
@@ -51,13 +55,28 @@ let vm=new Vue({
         }
     },
     computed:{
+        totalEffect:function(){
+            let total=0;
+            for(let obj in artifacts.data){
+                if(obj.efficiency>1){
+                    total+=obj.efficiency;
+                }
+            }
+            return total;
+        },
         bookRatio:function(){
             window.localStorage.setItem('totalRelics',this.totalRelics?this.totalRelics:0);
             window.localStorage.setItem('bosLevel',this.bosLevel?this.bosLevel:0);
-            if(this.bosLevel!=0 && this.totalRelics!=0){
+            let level=parseFloat(this.bosLevel);
+            let total=parseFloat(this.totalRelics);
+            if(level!=0 && total!=0){
                 let bookInfo=artifacts.data.bos;
-                let bookCost=Math.pow(parseFloat(this.bosLevel) + 0.5, bookInfo.cexpo + 1)/(bookInfo.cexpo + 1) * bookInfo.ccoef;
-                return (bookCost/parseFloat(this.totalRelics)*100).toFixed(2)+'%';
+                let bookCost=Math.pow(level + 0.5, bookInfo.cexpo + 1)/(bookInfo.cexpo + 1) * bookInfo.ccoef;
+                if(bookCost/total>1){
+                    return '红书消耗大于总圣物量';
+                }else{
+                    return (bookCost/total*100).toFixed(2)+'%';
+                }
             }else{
                 return 0;
             }
@@ -164,6 +183,17 @@ let vm=new Vue({
         }
     },
     methods:{
+        updateAllMaxArtifacts:function () {
+            $.each(artifacts.data, function (k, v) {
+                if(artifacts.data[k].max>0) {
+                    artifacts.data[k].level=artifacts.data[k].max;
+                }
+            });
+            artifacts = calculateAll(artifacts, true);
+        },
+        changeScreen:function(flag){
+            this.isScreen=flag;
+        },
         formatNum:function (num) {
             let e=Math.floor(Math.log10(num));
             let num_text= e>4 ? (num/Math.pow(10,e)).toFixed(2)+'e'+e : Math.floor(num);
@@ -1206,6 +1236,7 @@ function calculateArtifactEfficiencyCost(v, levels) {
 }
 
 function calculateArtifactEfficiency(v, cost, lvlChange, current_ad, current_effect, totalAD) {
+    //计算efficiency
     obfuscate++;
     var next_effect = 1 + v.effect * Math.pow(v.level + lvlChange, Math.pow((1 + (v.cexpo - 1) * Math.min(v.grate * (v.level + lvlChange), v.gmax)), v.gexpo));
     switch (v.dime) {
@@ -1740,7 +1771,9 @@ function exportData() {
     ex += 'in_' + vm.edSet.intimidate + '|';
     ex += 'im_' + vm.edSet.impact + '|';
     ex += 'ar_' + vm.edSet.arcane + '|';
-    ex += 'pl_' + vm.edSet.platinum;
+    ex += 'pl_' + vm.edSet.platinum + '|';
+    ex += 'to_' + vm.totalRelics + '|';
+    ex += 'bo_' + vm.bosLevel;
 
     $('#export').empty().text(ex);
     $('#export_wrap').show();
@@ -1811,6 +1844,8 @@ function importData() {
         vm.edSet.impact=myMap.get('im');
         vm.edSet.arcane=myMap.get('ar');
         vm.edSet.platinum=myMap.get('pl');
+        vm.totalRelics=myMap.get('to')?myMap.get('to'):vm.totalRelics;
+        vm.bosLevel=myMap.get('bo')?myMap.get('bo'):vm.bosLevel;
     }
 
     $('#export_wrap').hide();
