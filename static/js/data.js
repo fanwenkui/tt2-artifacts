@@ -174,6 +174,8 @@ var artifacts = {
     'data': {
         'bos': {
             'active': 1,
+            'fumo':0,
+            'fumoef':2,
             'name': '暗影之书',
             'nickname': 'BoS',
             'bonus': ' 圣物倍乘系数',
@@ -278,6 +280,8 @@ var artifacts = {
         },
         'bop': {
             'active': 1,
+            'fumo':0,
+            'fumoef':1e19,
             'name': '预言之书',
             'nickname': 'BoP',
             'bonus': ' 所有黄金',
@@ -485,6 +489,8 @@ var artifacts = {
         },
         'dr': {
             'active': 1,
+            'fumo':0,
+            'fumoef':1e13,
             'name': '神圣报应',
             'nickname': 'DR',
             'bonus': ' 所有伤害',
@@ -1156,6 +1162,8 @@ var artifacts = {
         },
         'fotk': {
             'active': 1,
+            'fumo':0,
+            'fumoef':1e12,
             'name': '守护者的树叶',
             'nickname': 'FotK',
             'bonus': ' 劈砍装备以及远程英雄加成',

@@ -1,4 +1,3 @@
-let jsVision='3.1.1';
 let vm=new Vue({
     el:'#tabContent',
     data:{
@@ -18,6 +17,8 @@ let vm=new Vue({
             platinum:1//白金
         },
         log:{
+            '2019.08.15':'1.更新了四个神器附魔<br/>\
+                          （TI9:CNDOTA加油！留下那座塔!）',
             '2019.05.24':'1.新增一键升满有等级上限的神器功能,减少满神器玩家首次录入神器时的工作量<br/>\
                           2.修复红书占比计算有概率出现不能计算的bug',
             '2019.05.21':'紧急修复了圣物单位选择e81以后数据不对的问题',
@@ -38,7 +39,7 @@ let vm=new Vue({
                         6.去掉了技能加点优化功能，因为感觉不智能，我也没有时间去修复得更智能<br/>\
                         （ps：白天要上班，更新不够及时，望见谅）'
         },
-        vision:'3.1.1'
+        vision:'3.2.1'
     },
     created:function(){
         if(window.localStorage.getItem('bookSet')){
@@ -316,10 +317,15 @@ function generateArtifacts() {
         row += '<input type="checkbox" aria-label="Checkbox to designate active status for ' + v.name + '" id="' + k + 'active"' + (v.active == 1 ? ' checked="checked"' : '') + ' onchange="updateActive(\'' + k + '\');" tabindex="-1">';
         row += '</td>';
         row += '<td>';
-        row += '<label for="' + k + 'active" id="basic-addon' + k + '">';
+        row += '<label for="' + k + 'active" id="basic-addon' + k + '" class="' + (v.fumo!=undefined?(v.fumo==1?'fumoText':''):'') + '">';
         row += '<span class="d-block d-sm-none">' + v.name + '</span>';
         row += '<span class="d-none d-sm-block">' + v.name + '</span>';
         row += '</label>';
+        row += '</td>';
+        row += '<td>';
+        if (v.fumo!=undefined){
+            row += '<input type="checkbox" aria-label="Checkbox to designate active status for ' + v.name + '" id="' + k + 'fumo"' + (v.fumo == 1 ? ' checked="checked"' : '') + ' onchange="updateFumo(\'' + k + '\');" tabindex="-1">';
+        }
         row += '</td>';
         row += '<td>';
         row += '<input id="' + k + '" value="' + (999999999999999 < v.level ? displayTruncated(v.level) : avoidSci(v.level)) + '" type="number" class="form-control artlvl" placeholder="0" aria-label="Level of ' + v.name + '" aria-describedby="basic-addon' + k + '"onchange="updateArtifact(\'' + k + '\')">';
@@ -459,6 +465,17 @@ function updateActive(k) {
     }
     adjustBoS();
     artifacts = calculate(artifacts, k, true, true);
+}
+
+function updateFumo(k) {
+    if ($('#' + k + 'fumo').is(':checked')) {
+        artifacts.data[k].fumo = 1;
+        $('#basic-addon' + k).addClass('fumoText');
+    } else {
+        artifacts.data[k].fumo = 0;
+        $('#basic-addon' + k).removeClass('fumoText');
+    }
+    updateArtifact(k);
 }
 
 function updateActiveSkill(k) {
@@ -1176,7 +1193,6 @@ function skillEff(k, v) {
 
 function oldEff(data, k, v) {
     var current_ad = v.level * v.ad;
-    // var current_effect = 1 + v.effect * Math.pow(v.level, Math.pow((1 + (v.cexpo - 1) * Math.min(v.grate * v.level, v.gmax)), v.gexpo));
     var current_effect = 1 + v.effect * Math.pow(v.level, v.gexpo);
     switch (v.dime) {
         case 0:
@@ -1192,6 +1208,11 @@ function oldEff(data, k, v) {
             }
             break;
     }
+
+    if(v.fumo != undefined && v.fumo == 1){
+        current_effect *= v.fumoef;
+    }
+
     data.data[k].current_ad = current_ad;
     data.data[k].current_effect = current_effect;
     if (v.max == -1 || v.max > v.level) {
@@ -1253,6 +1274,11 @@ function calculateArtifactEfficiency(v, cost, lvlChange, current_ad, current_eff
             }
             break;
     }
+
+    if(v.fumo != undefined && v.fumo==1){
+        next_effect *= v.fumoef;
+    }
+
     var effect_diff = Math.abs(next_effect) / Math.abs(current_effect);
     var effect_eff = Math.pow(effect_diff, v.rating);
     var ad_change = (((v.level + lvlChange) * v.ad) - current_ad);
@@ -1273,6 +1299,11 @@ function newEff(data, k, v, avglvl, cost, remainingArtifacts) {
     } else {
         var next_effect = 1 + v.effect * Math.pow(v.max, Math.pow((1 + (v.cexpo - 1) * Math.min(v.grate * v.max, v.gmax)), v.gexpo));
     }
+
+    if(v.fumo != undefined && v.fumo==1){
+        next_effect *= v.fumoef;
+    }
+
     var effect_eff = Math.pow(Math.abs(next_effect), v.rating);
     var ad_eff = 1 + ((avglvl * v.ad) / data.totalAD);
     var eff = Math.abs(((effect_eff * ad_eff) - 1) / cost / remainingArtifacts);
@@ -1651,6 +1682,9 @@ if (storageAvailable('localStorage')) {
             if (undefined != artifacts.data[k]) {
                 artifacts.data[k].level = v.level;
                 artifacts.data[k].active = v.active;
+                if(v.fumo!=undefined){
+                    artifacts.data[k].fumo = v.fumo;
+                }
             }
         });
     }
@@ -1756,7 +1790,11 @@ function exportData() {
     $.each(artifacts.data, function (k, v) {
         ex += k + '_';
         ex += v.active + '_';
-        ex += (999999999999999 < v.level ? displayTruncated(v.level) : avoidSci(v.level)) + '|';
+        ex += (999999999999999 < v.level ? displayTruncated(v.level) : avoidSci(v.level));
+        if(v.fumo!=undefined){
+            ex += '_'+v.fumo;
+        }
+        ex += '|';
     });
     ex = ex.slice(0, -1);
 
@@ -1815,6 +1853,9 @@ function importData() {
         var imaa = v.split('_');
         artifacts.data[imaa[0]].active = parseInt(imaa[1]);
         artifacts.data[imaa[0]].level = parseFloat(imaa[2]);
+        if(imaa.length==4 && imaa[3]!=undefined){
+            artifacts.data[imaa[0]].fumo = parseInt(imaa[3]);
+        }
     });
     //拆解技能
     if(im.length>=11){
