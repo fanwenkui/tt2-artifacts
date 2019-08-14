@@ -1,5 +1,5 @@
 let vm=new Vue({
-    el:'#tabContent',
+    el:'#app',
     data:{
         isScreen:false,
         totalRelics:0,
