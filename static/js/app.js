@@ -17,6 +17,7 @@ let vm=new Vue({
             platinum:1//白金
         },
         log:{
+            '2019.08.16':'修复附魔加成计算错误导致的神器加点不对的问题',
             '2019.08.15':'1.更新了四个神器附魔<br/>\
                           （TI9:CNDOTA加油！留下那座塔!）',
             '2019.05.24':'1.新增一键升满有等级上限的神器功能,减少满神器玩家首次录入神器时的工作量<br/>\
@@ -39,7 +40,7 @@ let vm=new Vue({
                         6.去掉了技能加点优化功能，因为感觉不智能，我也没有时间去修复得更智能<br/>\
                         （ps：白天要上班，更新不够及时，望见谅）'
         },
-        vision:'3.2.1'
+        vision:'3.2.2'
     },
     created:function(){
         if(window.localStorage.getItem('bookSet')){
@@ -752,6 +753,11 @@ function processPct(k, v, relics, totalAD, tattoo) {
             }
             break;
     }
+
+    if(v.fumo != undefined && v.fumo == 1){
+        current_effect *= v.fumoef;
+    }
+
     var levels = 0;
     var cost = 0;
     var total_cost = 0;
@@ -1274,10 +1280,10 @@ function calculateArtifactEfficiency(v, cost, lvlChange, current_ad, current_eff
             }
             break;
     }
-
-    if(v.fumo != undefined && v.fumo==1){
-        next_effect *= v.fumoef;
-    }
+    //
+    // if(v.fumo != undefined && v.fumo==1){
+    //     next_effect *= v.fumoef;
+    // }
 
     var effect_diff = Math.abs(next_effect) / Math.abs(current_effect);
     var effect_eff = Math.pow(effect_diff, v.rating);
@@ -1300,9 +1306,9 @@ function newEff(data, k, v, avglvl, cost, remainingArtifacts) {
         var next_effect = 1 + v.effect * Math.pow(v.max, Math.pow((1 + (v.cexpo - 1) * Math.min(v.grate * v.max, v.gmax)), v.gexpo));
     }
 
-    if(v.fumo != undefined && v.fumo==1){
-        next_effect *= v.fumoef;
-    }
+    // if(v.fumo != undefined && v.fumo==1){
+    //     next_effect *= v.fumoef;
+    // }
 
     var effect_eff = Math.pow(Math.abs(next_effect), v.rating);
     var ad_eff = 1 + ((avglvl * v.ad) / data.totalAD);
