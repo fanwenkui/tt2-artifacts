@@ -1086,6 +1086,8 @@ var artifacts = {
         },
         'sv': {
             'active': 1,
+            'fumo':0,
+            'fumoef':1e12,
             'name': '皇家队之剑',
             'nickname': 'SotR',
             'bonus': ' 刀剑装备以及近战英雄加成',

@@ -17,6 +17,9 @@ let vm=new Vue({
             platinum:1//白金
         },
         log:{
+            '2019.09.17':'1.更新了新的神器附魔。<br/>\
+                          2.修复了圣物量低时只加神器附魔的问题。<br/>\
+                          （ps:附魔神器加成在部分手机端显示的时候会多出10，暂时未找到原因，不影响使用)',
             '2019.08.16':'修复附魔加成计算错误导致的神器加点不对的问题',
             '2019.08.15':'1.更新了四个神器附魔<br/>\
                           （TI9:CNDOTA加油！留下那座塔!）',
@@ -40,7 +43,7 @@ let vm=new Vue({
                         6.去掉了技能加点优化功能，因为感觉不智能，我也没有时间去修复得更智能<br/>\
                         （ps：白天要上班，更新不够及时，望见谅）'
         },
-        vision:'3.2.2'
+        vision:'3.2.3'
     },
     created:function(){
         if(window.localStorage.getItem('bookSet')){
@@ -77,6 +80,7 @@ let vm=new Vue({
                 if(bookCost/total>1){
                     return '红书消耗大于总圣物量';
                 }else{
+                    //TODO 可以优化计算，去掉0，提高手机兼容性
                     return (bookCost/total*100).toFixed(2)+'%';
                 }
             }else{
@@ -754,9 +758,9 @@ function processPct(k, v, relics, totalAD, tattoo) {
             break;
     }
 
-    if(v.fumo != undefined && v.fumo == 1){
-        current_effect *= v.fumoef;
-    }
+    // if(v.fumo != undefined && v.fumo == 1){
+    //     current_effect *= v.fumoef;
+    // }
 
     var levels = 0;
     var cost = 0;
@@ -1205,18 +1209,18 @@ function oldEff(data, k, v) {
             break;
         case 1:
             if (0 < artifacts.data.tmg.level) {
-                current_effect *= 10;
+                current_effect =current_effect * 10;
             }
             break;
         case 2:
             if (0 < artifacts.data.ttof.level) {
-                current_effect *= 10;
+                current_effect =current_effect * 10;
             }
             break;
     }
 
     if(v.fumo != undefined && v.fumo == 1){
-        current_effect *= v.fumoef;
+        current_effect = current_effect * v.fumoef;
     }
 
     data.data[k].current_ad = current_ad;
